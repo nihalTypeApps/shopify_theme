@@ -9,7 +9,12 @@
 
 <link rel="stylesheet" href="{{ 'component-deferred-media.css' | asset_url }}" media="print" onload="this.media='all'">
 
-<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer">
+
+
+document.getElementById('globals').innerHTML = '<pre>{{globals | json}}</pre>;
+
+</script>
 
 {%- assign first_3d_model = product.media | where: "media_type", "model" | first -%}
 {%- if first_3d_model -%}
@@ -19,6 +24,10 @@
 {%- endif -%}
 
 <section class="page-width">
+  <div id="inventoryLocationInformation">
+    <strong>Inventory:</strong><br />
+    <span class="inventoryLocationLoading">Loading.. Nihallll</span>
+  </div>
   
   <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.gallery_layout }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
     <div class="grid__item product__media-wrapper">
@@ -332,6 +341,7 @@
                       <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
                         {{ option.name }}
                       </label>
+                      
                       <div class="select">
                         <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
                           class="select__select"
@@ -357,6 +367,7 @@
             {%- endunless -%}
 
             <noscript class="product-form__noscript-wrapper-{{ section.id }}">
+
               <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
                 <label class="form__label" for="Variants-{{ section.id }}">{{ 'products.product.product_variants' | t }}</label>
                 <div class="select">
@@ -421,10 +432,10 @@
 
               {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
 
-              {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+              {%- assign pick_up_availabilities = product.store_availabilities -%}
 
               <pickup-availability class="product__pickup-availabilities no-js-hidden"
-                {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %} available{% endif %}
+                {% if product.available  %} available{% endif %}
                 data-root-url="{{ routes.root_url }}"
                 data-variant-id="{{ product.selected_or_first_available_variant.id }}"
                 data-has-only-default-variant="{{ product.has_only_default_variant }}"
@@ -442,6 +453,22 @@
             </div>
 
             <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+
+            <script>
+              fetch(window.Shopify.routes.root + "variants/41479480311980/?section_id=pickup-availability")
+  .then(response => response.text())
+  .then(text => {
+    const container = document.querySelector('[data-store-availability-container]');
+    const pickupAvailabilityHTML = new DOMParser()
+      .parseFromString(text, 'text/html')
+      .querySelector('.shopify-section');
+
+    container.appendChild(pickupAvailabilityHTML);
+  })
+  .catch(e => {
+    console.error(e);
+  });
+            </script>
           {%- when 'rating' -%}
             {%- if product.metafields.reviews.rating.value != blank -%}
               {% liquid
@@ -475,13 +502,8 @@
       <button id="ModalClose-{{ section.id }}" type="button" class="product-media-modal__toggle" aria-label="{{ 'accessibility.close' | t }}">{% render 'icon-close' %}</button>
 
       <div class="product-media-modal__content" role="document" aria-label="{{ 'products.modal.label' | t }}" tabindex="0">
-        <h1>Helooooooooo Nihal</h1>
-        <h1>Helooooooooo Nihal</h1>
-        <h1>Helooooooooo Nihal</h1>
-        <h1>Helooooooooo Nihal</h1>
-        <h1>Helooooooooo Nihal</h1>
-        <h1>Helooooooooo Nihal</h1>
-        
+       
+
         {%- liquid
           if product.selected_or_first_available_variant.featured_media != null
             assign media = product.selected_or_first_available_variant.featured_media
